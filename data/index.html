@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>run me</title>
+    <style>
+        body {
+            display: flex;
+            flex-flow: column nowrap;
+            margin: 0;
+            background: #000;
+        }
+        * {
+            color: #ccc;
+            box-sizing: border-box;
+        }
+        .wrap {
+            padding: 10px;
+            display: flex;
+            flex-flow: column;
+            align-items: center;
+        }
+        button {
+            margin: 5px 0;
+            width: 300px;
+            padding: 5px;
+            border: 1px solid rgb(128, 121, 121);
+            border-radius: 14px;
+            color: #ccc;
+            background: 0;
+            cursor: pointer;
+            transition:  all .2s;
+            outline-color: #ccc;
+
+        }
+
+        button:hover {
+            background: #ccc;
+            color: #000;
+        }
+
+        label {
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            width: 300px;
+            margin: 5px 0;
+            padding: 0 4px;
+            border-radius: 14px;
+            border: 1px solid #ccc;
+        }
+        span {
+            margin-right: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        input {
+            padding: 5px;
+            border: 1px solid transparent;
+            background: #000;
+            border-radius: 5px;
+            margin: 5px 0;
+            width: 100%;
+            outline-color: #ccc;
+        }
+        input:focus {
+            border-color: #ccc;;
+        }
+        .title {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: rgb(128, 121, 121);
+        }
+
+        #status {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: red;
+            margin: 0 10px;
+        }
+        #status.online {
+            background-color: green;
+        }
+        #users {
+            font-size: 10px;
+            color: gray;
+        }
+        .timerElements {
+            display: flex;
+            flex-flow: column nowrap;
+        }
+
+        #lightStatus {
+            padding: 0;
+            border: 0;
+            margin: 10px 0;
+        }
+
+        #lightValue {
+            margin: 0 5px;
+        }
+    </style>
+    </head>
+<body>
+    <div class="wrap">
+        <h1 class="title">Smart timer<span id="status"></span><span id="users">0</span></h1>
+        <h3 id="time">23:59:59</h3>
+        <div id="gateStatus">gate status not set</div>
+        <button onclick="sendGateEvent()" >toggle gate</button>
+
+        <label for="light">Light <span id="lightValue">50</span> <input onchange="sendLightEvent()" name="light" type="range" step="1" id="lightStatus" min="0" max="100"></label>
+
+        <div class="timerElements">
+            <label>
+                <span>Intervals</span>
+                <input type="number" id="intervals" placeholder="number of intervals">
+            </label>
+            <label>
+                <span>Interval time sec</span>
+                <input type="number" id="idleTime" placeholder="interval sec">
+            </label>
+            <label>
+                <span>Work time sec</span>
+                <input type="number" id="workTime" placeholder="work sec">
+            </label>
+        </div>
+        <button id="sendInterval" onclick="sendEventIntervals();">set</button>
+        <div class="info">
+            <div>last interval: <span id="lastIntervalTime">not set</span></div>
+            <div>current process status: <span id="processStatus">not set</span></div>
+            <div>estimated finished time: <span id="estIntervalTime">not set</span></div>
+        </div>
+        <button onclick="sendShutterEvent()" >make photo</button>
+    </div>
+</body>
+<script>
+    let websock;
+
+    // events name
+    const eventNames = {
+        connectedUsersEventName: "user",
+
+        timeEventName: "time",
+        gateEventName: "gate",
+
+        lightStatusEventName: "list",
+
+        shutterEventName: "shut",
+
+        intervalsEventName: "inte",
+        workingTimeEventName: "woti",
+        idleTimeEventName: "idti",
+        lastIntervalTimeEventName: "lati",
+        estimatedFinishTimeEventName: "esti",
+        workStatusEventName: "wost",
+
+        isOpenGateAtWorkEventName:"isga",
+        isLightOnAtWorkEventName: "isli",
+        isPressButtonAtWorkEventName: "isbu",
+    };
+
+    // elements
+    const statusElement = document.getElementById('status');
+    const usersContainerElement = document.getElementById('users');
+
+    const timeElement = document.getElementById('time');
+
+    const gateElement = document.getElementById('gateStatus');
+
+    const lightElement = document.getElementById('lightStatus');
+    const lightValueElement = document.getElementById('lightValue');
+
+    const intervalsInputElement = document.getElementById('intervals');
+    const intervalIdleInputElement = document.getElementById('idleTime');
+    const intervalWorkInputElement = document.getElementById('workTime');
+    const lastIntervalTimeElement = document.getElementById('lastIntervalTime');
+    const processStatusElement = document.getElementById('processStatus');
+    const estimatedIntervalTimeElement = document.getElementById('estIntervalTime');
+
+    function start() {
+
+        websock = webSocetConnect()
+
+        websock.onopen = function(evt) {
+            setStatus('online');
+        };
+        websock.onclose = function(evt) {
+            setStatus('offline');
+        };
+
+        websock.onerror = function(evt) { 
+            console.error(evt);
+            setStatus('offline');
+            setTimeout(() => {
+                console.log('recconect...');
+                websock = webSocetConnect();
+            }, 5000);
+        };
+ 
+        websock.onmessage = function(evt) {
+            console.log(evt);
+            const data = JSON.parse(evt.data);
+
+            switch (data.name) {
+                case eventNames.connectedUsersEventName:
+                    usersContainerElement.innerText = data.value;
+                    break;
+                case eventNames.timeEventName:
+                    setTime(data.value);
+                    break;
+                case eventNames.gateEventName:
+                    setGateStatus(data.value);
+                    break;
+                case eventNames.lightStatusEventName:
+                    setLightStatus(data.value);
+                    break;
+                case eventNames.intervalsEventName:
+                    setIntarvals(data.value);
+                    break;
+                case eventNames.idleTimeEventName:
+                    setIntervalIdleTime(data.value);
+                    break;
+                case eventNames.workingTimeEventName:
+                    setIntarvalWorkTime(data.value);
+                    break;
+                case eventNames.lastIntervalTimeEventName:
+                    setLastIntervalTime(data.value);
+                    break;
+                case eventNames.estimatedFinishTimeEventName:
+                    setEstimatedIntervalTime(data.value);
+                    break;
+                case eventNames.workStatusEventName:
+                    setIntervalStatus(data.value);
+                    break;
+                default:
+                    console.error(`unnkwon event name: ${JSON.stringify(data, null, 3)}`);
+            }
+
+        };
+    }
+
+    function webSocetConnect() {
+        return new WebSocket('ws://' + window.location.hostname + ':81/');
+    }
+
+    function setStatus(status) {
+        if (status === 'online') {
+            statusElement.classList.add('online');
+        } else if (status === 'offline') {
+            statusElement.classList.remove('online');
+        }
+    }
+
+
+    function setGateStatus(status) {
+        if (status == 1) {
+            gateElement.innerText = 'gate is opened';
+        } else if (status == 0) {
+            gateElement.innerText = 'gate is closed';
+        }
+    }
+
+    function setLightStatus(status) {
+        lightElement.value = status;
+        lightValueElement.innerText = status;
+    }
+
+    function setIntarvals(intervals) {
+        intervalsInputElement.value = intervals;
+    }
+
+    function setIntervalIdleTime(intervals) {
+        intervalIdleInputElement.value = intervals;
+    }
+
+    function setIntarvalWorkTime(intervals) {
+        intervalWorkInputElement.value = intervals;
+    }
+
+    function setTime(time) {
+        timeElement.innerText = time;
+    }
+
+    function setLastIntervalTime(time) {
+        lastIntervalTimeElement.innerText = formatDate(new Date(time * 1000));
+    }
+
+    function setEstimatedIntervalTime(time) {
+        estimatedIntervalTimeElement.innerText = formatDate(new Date(time * 1000));
+    }
+
+    function setIntervalStatus(status) {
+        if (status == 1) {
+            processStatusElement.innerText = 'working';
+        } else if (status == 0) {
+            processStatusElement.innerText = 'idle';
+        }
+    }
+
+    function sendGateEvent() {
+        websock.send(getMessageToSend(eventNames.gateEventName, 0));
+    }
+
+    function sendLightEvent() {
+        lightValueElement.innerText = lightElement.value;
+        websock.send(getMessageToSend(eventNames.lightStatusEventName, lightElement.value));
+    }
+
+    function sendShutterEvent() {
+        websock.send(getMessageToSend(eventNames.shutterEventName, 1));
+    }
+
+    function sendEventIntervals() {
+        websock.send(getMessageToSend(eventNames.intervalsEventName, intervalsInputElement.value));
+        websock.send(getMessageToSend(eventNames.workingTimeEventName, intervalWorkInputElement.value));
+        websock.send(getMessageToSend(eventNames.idleTimeEventName, intervalIdleInputElement.value));
+    }
+
+    function getMessageToSend(name, value) {
+        return JSON.stringify({name, value});
+    }
+
+    function formatDate(d) {
+        try {
+            const offset = d.getTimezoneOffset() * 60000;
+            const date = new Date(d.getTime() + offset);
+            return date.toLocaleString();
+            // return `${formatNumber(d.getDate())}.${formatNumber(d.getMonth() + 1)}.${d.getFullYear()} ${formatNumber(d.getHours())}:${formatNumber(d.getMinutes())}`;
+        } catch(e) {
+            console.log(e);
+            return 'error format';
+        }
+    }
+
+    function formatNumber(n) {
+        if (n < 9) {
+            return '0' + n;
+        } else {
+            return n;
+        }
+    }
+
+    start();
+</script>
+</html>
