@@ -1,5 +1,4 @@
 #include <socket/messages.helper.h>
-#include <ArduinoJson.h>
 
 String MessageHelper::getMessageToSend(const char* fieldName, String value) {
     int size = sizeof(nameField) + sizeof(valueField) + sizeof(fieldName) + sizeof(value);

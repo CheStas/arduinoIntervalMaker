@@ -1,5 +1,4 @@
 #include <intervalometer/intervalometer.component.h>
-#include <common/event_names.h>
 
 void IntervalometerComponent::setInterval(int intervals) {
     intervalCounter = intervals;
@@ -45,14 +44,10 @@ void IntervalometerComponent::loop(long savedEpochTime) {
 
             setEstimatedFinishTime(savedEpochTime, intervalCounter, workingTimeSec, idleTimeSec);
 
-            // TODO implement work
-            // doWork();
         } else if (workStatus && diffFromLastInterval > workingTimeSec) {
 
             setWorkStatus(false);
 
-            // TODO implement work
-            // endWork();
             setLastIntervalTime(savedEpochTime);
             setInterval(--intervalCounter);
         }

@@ -2,6 +2,7 @@
 #define INTERVALOMETER_COMPONENT_H
 
 #include <common/mediator.cpp>
+#include <common/event_names.h>
 
 class IntervalometerComponent : public BaseComponent {
 public:

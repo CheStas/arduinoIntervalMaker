@@ -2,6 +2,9 @@
 #define DATABASE_SERVICE_H
 
 #include <Arduino.h>
+#include "LittleFS.h"
+#include <ArduinoJson.h>
+#include <common/event_names.h>
 
 struct boxStruct {
     int goalGatePosition;

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Servo.h>
 #include <common/mediator.cpp>
+#include <common/event_names.h>
 
 class BoxComponent : public BaseComponent {
     Servo myservo;

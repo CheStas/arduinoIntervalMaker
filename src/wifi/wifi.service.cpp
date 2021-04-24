@@ -1,5 +1,4 @@
 
-#include <Arduino.h>
 #include <wifi/wifi.service.h>
 
 WifiService::WifiService() : server(80) {};
@@ -25,7 +24,7 @@ void WifiService::begin() {
     Serial.print("Connect to http://");
     Serial.println(WiFi.localIP());
 
-    SPIFFS.begin();
+    LittleFS.begin();
 
     server.onNotFound([this]() {                              // If the client requests any URI
         if (!handleFileRead(server.uri()))                  // send it if it exists
@@ -43,11 +42,11 @@ bool WifiService::handleFileRead(String path) {  // send the right file to the c
     if (path.endsWith("/")) path += "index.html";           // If a folder is requested, send the index file
     String contentType = getContentType(path);             // Get the MIME type
     String pathWithGz = path + ".gz";
-    if (SPIFFS.exists(pathWithGz) ||
-        SPIFFS.exists(path)) {  // If the file exists, either as a compressed archive, or normal
-        if (SPIFFS.exists(pathWithGz))                          // If there's a compressed version available
+    if (LittleFS.exists(pathWithGz) ||
+        LittleFS.exists(path)) {  // If the file exists, either as a compressed archive, or normal
+        if (LittleFS.exists(pathWithGz))                          // If there's a compressed version available
             path += ".gz";                                         // Use the compressed version
-        File file = SPIFFS.open(path, "r");                    // Open the file
+        File file = LittleFS.open(path, "r");                    // Open the file
         server.streamFile(file, contentType);    // Send it to the client
         file.close();                                          // Close the file again
         Serial.println(String("\tSent file: ") + path);

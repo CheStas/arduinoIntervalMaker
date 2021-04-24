@@ -5,11 +5,11 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <common/mediator.cpp>
-
+#include <common/event_names.h>
 
 class TimeComponent : public BaseComponent {
 
-    const long utcOffsetInSeconds = 7200;
+    const long utcOffsetInSeconds = 10800;
     char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
     long savedMillisForTime = 0;
     WiFiUDP ntpUDP;

@@ -1,0 +1,100 @@
+body {
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 0;
+    background: #000;
+}
+* {
+    color: #ccc;
+    box-sizing: border-box;
+}
+.wrap {
+    padding: 10px;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+button {
+    margin: 5px 0;
+    width: 300px;
+    padding: 5px;
+    border: 1px solid rgb(128, 121, 121);
+    border-radius: 14px;
+    color: #ccc;
+    background: 0;
+    cursor: pointer;
+    transition:  all .2s;
+    outline-color: #ccc;
+
+}
+
+button:hover {
+    background: #ccc;
+    color: #000;
+}
+
+label {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    width: 300px;
+    margin: 5px 0;
+    padding: 0 4px;
+    border-radius: 14px;
+    border: 1px solid #ccc;
+}
+span {
+    margin-right: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+input {
+    padding: 5px;
+    border: 1px solid transparent;
+    background: #000;
+    border-radius: 5px;
+    margin: 5px 0;
+    width: 100%;
+    outline-color: #ccc;
+}
+input:focus {
+    border-color: #ccc;;
+}
+.title {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: rgb(128, 121, 121);
+}
+
+#status {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: red;
+    margin: 0 10px;
+}
+#status.online {
+    background-color: green;
+}
+#users {
+    font-size: 10px;
+    color: gray;
+}
+.timerElements {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+#lightStatus {
+    padding: 0;
+    border: 0;
+    margin: 10px 0;
+}
+
+#lightValue {
+    margin: 0 5px;
+}

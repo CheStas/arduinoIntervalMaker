@@ -1,6 +1,4 @@
 #include <time/time.component.h>
-#include <common/event_names.h>
-
 
 void TimeComponent::begin() {
     timeClient.begin();
@@ -13,7 +11,7 @@ void TimeComponent::loop() {
         updateTimeString(timeClient.getFormattedTime());
         updateEpochTime(timeClient.getEpochTime());
         // debug
-        Serial.println(savedEpochTime);
+        // Serial.println(savedEpochTime);
     }
 }
 

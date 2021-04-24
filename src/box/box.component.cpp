@@ -1,5 +1,4 @@
 #include <box/box.component.h>
-#include <common/event_names.h>
 
 void BoxComponent::begin(uint8_t pin) {
     myservo.attach(pin);

@@ -5,6 +5,7 @@
 #include <WebSocketsServer.h>
 #include <socket/messages.helper.h>
 #include <common/mediator.cpp>
+#include <common/event_names.h>
 
 class SocketService : public BaseComponent {
 public:

@@ -1,7 +1,3 @@
-#include <Arduino.h>
-#include <FS.h>
-#include <ArduinoJson.h>
-#include <common/event_names.h>
 #include <database/database.service.h>
 
 void DatabaseService::setDataInBuffer() {
@@ -9,7 +5,7 @@ void DatabaseService::setDataInBuffer() {
 }
 
 void DatabaseService::updateAllDataInDb() {
-    File db = SPIFFS.open("/data.json", "w+");
+    File db = LittleFS.open("/data.json", "w+");
     // if (db.available()) {
     // TODO count doc size!!!
     DynamicJsonDocument jsonDoc(1024);
@@ -37,7 +33,7 @@ void DatabaseService::loop() {
 }
 
 void DatabaseService::setDataFromDb() {
-    File dataFile = SPIFFS.open("/data.json", "r");
+    File dataFile = LittleFS.open("/data.json", "r");
     if (dataFile.available()) {
             // TODO count doc size!!!
         DynamicJsonDocument jsonDoc(dataFile.size()*2);

@@ -1,7 +1,4 @@
-#include <Arduino.h>
-#include <WebSocketsServer.h>
 #include <socket/socket.service.h>
-#include <common/event_names.h>
 
 void SocketService::begin() {
     webSocket.begin();

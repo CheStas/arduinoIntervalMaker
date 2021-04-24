@@ -73,9 +73,12 @@ void loop() {
     wifi->loop();
     socket->loop();
     timeComponent->loop();
-    box->loop();
-    light->loop();
-    shutter->loop();
+ 
     intervalometer->loop(timeComponent->savedEpochTime);
+    light->loopIsTimeToOn(timeComponent->savedEpochTime);
+    light->loop();
+    box->loop();
+    shutter->loop();
+
     app->loop();
 }
