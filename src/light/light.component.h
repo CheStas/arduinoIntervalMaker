@@ -10,18 +10,20 @@ class LightComponent : public BaseComponent {
     int targetBrightness = 0;
     unsigned long savedMillis = 0;
     uint8_t pin;
-    int lightOnAtSecondsTooday = 0;
-    int lightOffAtSecondsTooday = 0;
     boolean isInRange(int from, int to, int target);
 
 public:
+    int lightOnAtSecondsTooday = 0;
+    int lightOffAtSecondsTooday = 0;
+
     void begin(uint8_t lightPin);
 
     void loop();
-    void loopIsTimeToOn(long savedEpochTime);
+    void loopIsTimeToOn(long savedEpochTime, bool disableCheck);
 
     void setBrightness(int num);
-    boolean setWorkingHours(int from, int to);
+    void setWorkingHoursFrom(int from);
+    void setWorkingHoursTo(int to);
     int getBrightness();
 };
 

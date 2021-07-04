@@ -5,12 +5,9 @@ void LightComponent::begin(uint8_t lightPin) {
     pinMode(lightPin, OUTPUT);
 }
 
-void LightComponent::loopIsTimeToOn(long savedEpochTime) {
-    if (lightOnAtSecondsTooday && lightOffAtSecondsTooday) {
+void LightComponent::loopIsTimeToOn(long savedEpochTime, bool disableCheck) {
+    if (!disableCheck && lightOnAtSecondsTooday && lightOffAtSecondsTooday) {
         int secondsFromDayStart = savedEpochTime % 86400;
-        // debug
-        Serial.print("Seconds from midnight: ");
-        Serial.println(secondsFromDayStart);
 
         bool isNowInRange = isInRange(lightOnAtSecondsTooday, lightOffAtSecondsTooday, secondsFromDayStart);
         if (isNowInRange && getBrightness() == 0) {
@@ -27,7 +24,7 @@ void LightComponent::loop() {
         if (brightness < targetBrightness) brightness += 1;
         else if (brightness > targetBrightness) brightness -= 1;
         analogWrite(pin, brightness);
-        savedMillis = millis() + 10;
+        savedMillis = millis() + 3;
 
         if (brightness == targetBrightness) {
             this->mediator_->Notify(this, eventNames.lightStatusEventName);
@@ -35,20 +32,19 @@ void LightComponent::loop() {
     }
 }
 
-boolean LightComponent::setWorkingHours(int from, int to) {
-    if (from == 0 && to == 0) {
-        lightOnAtSecondsTooday = 0;
-        lightOffAtSecondsTooday = 0;
-        return true;
-    }
-
-    if (to > 0 && to < 86400 && from > 0 && from < 86400) {
+void LightComponent::setWorkingHoursFrom(int from) {
+    if (from >= 0 && from < 86400) {
         lightOnAtSecondsTooday = from;
+    }
+    this->mediator_->Notify(this, eventNames.lightWorkingHoursFrom);
+}
+
+void LightComponent::setWorkingHoursTo(int to) {
+    if (to >= 0 && to < 86400) {
         lightOffAtSecondsTooday = to;
-        return true;
     }
 
-    return false;
+    this->mediator_->Notify(this, eventNames.lightWorkingHoursTo);
 }
 
 boolean LightComponent::isInRange(int from, int to, int target) {

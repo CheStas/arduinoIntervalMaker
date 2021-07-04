@@ -17,6 +17,8 @@ struct EventNames {
     eventNameType goalGatePositionEventName = "gapo";
 
     eventNameType lightStatusEventName = "list";
+    eventNameType lightWorkingHoursFrom = "liwf";
+    eventNameType lightWorkingHoursTo = "liwt";
 
     eventNameType shutterEventName = "shut";
 

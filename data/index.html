@@ -9,10 +9,15 @@
     <div class="wrap">
         <h1 class="title">Smart timer<span id="status"></span><span id="users">0</span></h1>
         <h3 id="time">23:59:59</h3>
-        <div id="gateStatus">gate status not set</div>
+        <div class="info">
+            <div id="gateStatus">gate status not set</div>
+            <div>last interval: <span id="lastIntervalTime">not set</span></div>
+            <div>current process status: <span id="processStatus">not set</span></div>
+            <div>estimated finished time: <span id="estIntervalTime">not set</span></div>
+        </div>
         <button onclick="sendGateEvent()" >toggle gate</button>
 
-        <label for="light">Light <span id="lightValue">50</span> <input onchange="sendLightEvent()" name="light" type="range" step="1" id="lightStatus" min="0" max="100"></label>
+        <div class="divider"></div>
 
         <div class="timerElements">
             <label>
@@ -29,12 +34,30 @@
             </label>
         </div>
         <button id="sendInterval" onclick="sendEventIntervals();">set</button>
-        <div class="info">
-            <div>last interval: <span id="lastIntervalTime">not set</span></div>
-            <div>current process status: <span id="processStatus">not set</span></div>
-            <div>estimated finished time: <span id="estIntervalTime">not set</span></div>
-        </div>
+
+        <div class="divider"></div>
+
+        <label for="light">Light <span id="lightValue">50</span> <input onchange="sendLightEvent()" name="light" type="range" step="1" id="lightStatus" min="0" max="100"></label>
+        <label>
+            <span>light on at</span>
+            <input type="time" id="lightOnAt" placeholder="light on at min">
+        </label>
+        <label>
+            <span>light off at</span>
+            <input type="time" id="lightOffAt" placeholder="light off at min">
+        </label>
+        <button id="updateLightWorkingHours" onclick="sendEventWorkingHours();">set light</button>
+        <button onclick="resetWorkingHors()">reset light hours</button>
+
+        <div class="divider"></div>
+
         <button onclick="sendShutterEvent()" >make photo</button>
+
+        <div class="divider"></div>
+
+        <label class="label_check"><span>work box open</span> <input id="isOpneBoxAtWork" onchange="sendIsOpenBoxAtWrok()" type="checkbox"> </label>
+        <label class="label_check"><span>work lignt on</span> <input id="isLigtOnAtWork" onchange="sendIsLighOnAtWrok()" type="checkbox"></label>
+        <label class="label_check"><span>work make photo</span> <input id="isMakePhotoAtWork" onchange="sendIsMakePhotoAtWrok()" type="checkbox"></label>
     </div>
 </body>
 <script src="src/index.js"></script>

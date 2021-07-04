@@ -26,33 +26,57 @@ App::App(
     this->box->setGoalPosition(this->database->box.goalGatePosition);
 
     this->light->setBrightness(this->database->light.lightStatus);
+    this->light->setWorkingHoursFrom(this->database->light.lightOnAtSecondsTooday);
+    this->light->setWorkingHoursTo(this->database->light.lightOffAtSecondsTooday);
 
     this->intervalometer->setInterval(this->database->intervalometer.intervalCounter);
     this->intervalometer->setWorkingTime(this->database->intervalometer.workingTimeSec);
     this->intervalometer->setIdleTime(this->database->intervalometer.idleTimeSec);
     this->intervalometer->setLastIntervalTime(this->database->intervalometer.lastIntervalTime);
     this->intervalometer->setWorkStatus(this->database->intervalometer.workStatus);
+
+    isOpenBoxAtWork = this->database->app.isOpenBoxAtWork;
+    isLightOnAtWork = this->database->app.isLightOnAtWork;
+    isMakePhotoAtWork = this->database->app.isMakePhotoAtWork;
 };
 
 void App::loop() {
     database->loop();
 
     if (savedMillis && millis() > savedMillis) {
-        shutter->shut();
+        stopWorkStage2();
         savedMillis = 0;
     }
 }
 
 void App::startWork() {
-    box->openGate();
-    light->setBrightness(100);
+    if (isOpenBoxAtWork) {
+        box->openGate();
+    }
 
-    savedMillis = millis() + 2000;
+    if (isLightOnAtWork) {
+        light->setBrightness(100);
+    }
 }
 
 void App::stopWork() {
-    box->closeGate();
-    light->setBrightness(0);
+    if (isMakePhotoAtWork) {
+        shutter->shut();
+        savedMillis = millis() + 2000;
+        return;
+    }
+
+    stopWorkStage2();
+}
+
+void App::stopWorkStage2() {
+    if (isOpenBoxAtWork) {
+        box->closeGate();
+    }
+
+    if (isLightOnAtWork) {
+        light->setBrightness(0);
+    }
 }
 
 void App::Notify(BaseComponent *sender, eventNameType event) {
@@ -111,6 +135,23 @@ void App::Notify(BaseComponent *sender, eventNameType event) {
         database->light.lightStatus = light->getBrightness();
         database->setDataInBuffer();
 
+    } else if (strcmp(event, eventNames.lightWorkingHoursFrom) == 0) {
+
+        socket->broadcastTXT(eventNames.lightWorkingHoursFrom, light->lightOnAtSecondsTooday);
+        database->light.lightOnAtSecondsTooday = light->lightOnAtSecondsTooday;
+        database->setDataInBuffer();
+
+    } else if (strcmp(event, eventNames.lightWorkingHoursTo) == 0) {
+
+        socket->broadcastTXT(eventNames.lightWorkingHoursTo, light->lightOffAtSecondsTooday);
+        database->light.lightOffAtSecondsTooday = light->lightOffAtSecondsTooday;
+        database->setDataInBuffer();
+
+    } else if(strcmp(event, eventNames.isOpenGateAtWorkEventName) == 0) {
+
+        socket->broadcastTXT(eventNames.isOpenGateAtWorkEventName, isOpenBoxAtWork);
+        database->setDataInBuffer();
+
     } else {
         Serial.print("unnkown event name: ");
         Serial.println(event);
@@ -124,6 +165,10 @@ void App::Notify(BaseComponent *sender, eventNameType event, char* name, int val
             box->toggleGate();
         } else if (strcmp(name, eventNames.lightStatusEventName) == 0) {
             light->setBrightness(value);
+        } else if (strcmp(name, eventNames.lightWorkingHoursFrom) == 0) {
+            light->setWorkingHoursFrom(value);
+        } else if (strcmp(name, eventNames.lightWorkingHoursTo) == 0) {
+            light->setWorkingHoursTo(value);
         } else if (strcmp(name, eventNames.shutterEventName) == 0) {
             shutter->shut();
         } else if (strcmp(name, eventNames.intervalsEventName) == 0) {
@@ -132,6 +177,27 @@ void App::Notify(BaseComponent *sender, eventNameType event, char* name, int val
             intervalometer->setWorkingTime(value);
         } else if (strcmp(name, eventNames.idleTimeEventName) == 0) {
             intervalometer->setIdleTime(value);
+        } else if (strcmp(name, eventNames.isOpenGateAtWorkEventName) == 0) {
+
+            isOpenBoxAtWork = value;
+            socket->broadcastTXT(eventNames.isOpenGateAtWorkEventName, isOpenBoxAtWork);
+            database->app.isOpenBoxAtWork = isOpenBoxAtWork;
+            database->setDataInBuffer();
+
+        } else if (strcmp(name, eventNames.isLightOnAtWorkEventName) == 0) {
+
+            isLightOnAtWork = value;
+            socket->broadcastTXT(eventNames.isLightOnAtWorkEventName, isLightOnAtWork);
+            database->app.isLightOnAtWork = isLightOnAtWork;
+            database->setDataInBuffer();
+
+        } else if (strcmp(name, eventNames.isPressButtonAtWorkEventName) == 0) {
+
+            isMakePhotoAtWork = value;
+            socket->broadcastTXT(eventNames.isPressButtonAtWorkEventName, isMakePhotoAtWork);
+            database->app.isMakePhotoAtWork = isMakePhotoAtWork;
+            database->setDataInBuffer();
+
         } else {
             Serial.print("unnkown client event name: ");
             Serial.print(name);
@@ -150,7 +216,13 @@ void App::Notify(BaseComponent *sender, eventNameType event, uint8_t num) {
 
         socket->sendTo(num, eventNames.gateEventName, box->gateStatus);
 
+        socket->sendTo(num, eventNames.isOpenGateAtWorkEventName, isOpenBoxAtWork);
+        socket->sendTo(num, eventNames.isLightOnAtWorkEventName, isLightOnAtWork);
+        socket->sendTo(num, eventNames.isPressButtonAtWorkEventName, isMakePhotoAtWork);
+
         socket->sendTo(num, eventNames.lightStatusEventName, light->getBrightness());
+        socket->sendTo(num, eventNames.lightWorkingHoursFrom, light->lightOnAtSecondsTooday);
+        socket->sendTo(num, eventNames.lightWorkingHoursTo, light->lightOffAtSecondsTooday);
 
         socket->sendTo(num, eventNames.intervalsEventName, intervalometer->intervalCounter);
         socket->sendTo(num, eventNames.workingTimeEventName, intervalometer->workingTimeSec);

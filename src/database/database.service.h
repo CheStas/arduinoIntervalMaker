@@ -12,6 +12,8 @@ struct boxStruct {
 
 struct lightStruct {
     int lightStatus;
+    int lightOnAtSecondsTooday;
+    int lightOffAtSecondsTooday;
 };
 
 struct intervalometerStruct {
@@ -20,6 +22,12 @@ struct intervalometerStruct {
     int idleTimeSec;
     long lastIntervalTime;
     bool workStatus;
+};
+
+struct appStruct {
+    bool isOpenBoxAtWork;
+    bool isLightOnAtWork;
+    bool isMakePhotoAtWork;
 };
 
 class DatabaseService {
@@ -32,6 +40,7 @@ public:
     boxStruct box;
     lightStruct light;
     intervalometerStruct intervalometer;
+    appStruct app;
 
     void setDataInBuffer();
 

@@ -14,7 +14,7 @@ void BoxComponent::loop() {
         if (gatePosition == goalGatePosition) {
             setGateStatus();
         }
-        savedMillisForServo = millis() + 30;
+        savedMillisForServo = millis() + 15;
     }
 }
 

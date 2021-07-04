@@ -5,7 +5,7 @@ body {
     background: #000;
 }
 * {
-    color: #ccc;
+    color: #58af58;
     box-sizing: border-box;
 }
 .wrap {
@@ -20,16 +20,16 @@ button {
     padding: 5px;
     border: 1px solid rgb(128, 121, 121);
     border-radius: 14px;
-    color: #ccc;
+    color: #58af58;
     background: 0;
     cursor: pointer;
     transition:  all .2s;
-    outline-color: #ccc;
+    outline-color: #58af58;
 
 }
 
 button:hover {
-    background: #ccc;
+    background: #58af58;
     color: #000;
 }
 
@@ -41,8 +41,13 @@ label {
     margin: 5px 0;
     padding: 0 4px;
     border-radius: 14px;
-    border: 1px solid #ccc;
+    border: 1px solid #58af58;
 }
+
+.label_check span, .label_check input {
+    width: 50%;
+}
+
 span {
     margin-right: 5px;
     font-size: 14px;
@@ -55,10 +60,10 @@ input {
     border-radius: 5px;
     margin: 5px 0;
     width: 100%;
-    outline-color: #ccc;
+    outline-color: #58af58;
 }
 input:focus {
-    border-color: #ccc;;
+    border-color: #58af58;;
 }
 .title {
     display: flex;
@@ -68,7 +73,11 @@ input:focus {
     text-align: center;
     color: rgb(128, 121, 121);
 }
-
+.divider {
+    width: 100%;
+    border-top: 2px solid #58af58;
+    border-radius: 50%;
+}
 #status {
     display: block;
     width: 20px;

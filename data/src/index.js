@@ -8,6 +8,8 @@ const eventNames = {
     gateEventName: "gate",
 
     lightStatusEventName: "list",
+    lightWorkingHoursFrom: "liwf",
+    lightWorkingHoursTo: "liwt",
 
     shutterEventName: "shut",
 
@@ -34,12 +36,19 @@ const gateElement = document.getElementById('gateStatus');
 const lightElement = document.getElementById('lightStatus');
 const lightValueElement = document.getElementById('lightValue');
 
+const lightOnAtElement = document.getElementById('lightOnAt');
+const lightOffAtElement = document.getElementById('lightOffAt');
+
 const intervalsInputElement = document.getElementById('intervals');
 const intervalIdleInputElement = document.getElementById('idleTime');
 const intervalWorkInputElement = document.getElementById('workTime');
 const lastIntervalTimeElement = document.getElementById('lastIntervalTime');
 const processStatusElement = document.getElementById('processStatus');
 const estimatedIntervalTimeElement = document.getElementById('estIntervalTime');
+
+const isOpneBoxAtWorkElement = document.getElementById('isOpneBoxAtWork');
+const isLigtOnAtWorkElement = document.getElementById('isLigtOnAtWork');
+const isMakePhotoAtWorkElement = document.getElementById('isMakePhotoAtWork');
 
 function start() {
 
@@ -78,6 +87,12 @@ function start() {
             case eventNames.lightStatusEventName:
                 setLightStatus(data.value);
                 break;
+            case eventNames.lightWorkingHoursFrom:
+                setLightWorkingHoursFrom(data.value);
+                break;
+            case eventNames.lightWorkingHoursTo:
+                setLightWorkingHoursTo(data.value);
+                break;
             case eventNames.intervalsEventName:
                 setIntarvals(data.value);
                 break;
@@ -95,6 +110,15 @@ function start() {
                 break;
             case eventNames.workStatusEventName:
                 setIntervalStatus(data.value);
+                break;
+            case eventNames.isOpenGateAtWorkEventName:
+                setIsOpneBoxAtWork(data.value);
+                break;
+            case eventNames.isLightOnAtWorkEventName:
+                setIsLigtOnAtWork(data.value);
+                break;
+            case eventNames.isPressButtonAtWorkEventName:
+                setIsMakePhotoAtWork(data.value);
                 break;
             default:
                 console.error(`unnkwon event name: ${JSON.stringify(data, null, 3)}`);
@@ -129,6 +153,14 @@ function setLightStatus(status) {
     lightValueElement.innerText = status;
 }
 
+function setLightWorkingHoursFrom(from) {
+    lightOnAtElement.value = convertSecondsToStringHorst(from);
+}
+
+function setLightWorkingHoursTo(to) {
+    lightOffAtElement.value = convertSecondsToStringHorst(to);
+}
+
 function setIntarvals(intervals) {
     intervalsInputElement.value = intervals;
 }
@@ -161,13 +193,52 @@ function setIntervalStatus(status) {
     }
 }
 
+function setIsOpneBoxAtWork(value) {
+    isOpneBoxAtWorkElement.checked = value;
+}
+
+function setIsLigtOnAtWork(value) {
+    isLigtOnAtWorkElement.checked = value;
+}
+
+function setIsMakePhotoAtWork(value) {
+    isMakePhotoAtWorkElement.checked = value;
+}
+
 function sendGateEvent() {
     websock.send(getMessageToSend(eventNames.gateEventName, 0));
+}
+
+function sendIsOpenBoxAtWrok() {
+    websock.send(getMessageToSend(eventNames.isOpenGateAtWorkEventName, Number(isOpneBoxAtWorkElement.checked)));
+}
+
+function sendIsLighOnAtWrok() {
+    websock.send(getMessageToSend(eventNames.isLightOnAtWorkEventName, Number(isLigtOnAtWorkElement.checked)));
+}
+
+function sendIsMakePhotoAtWrok() {
+    websock.send(getMessageToSend(eventNames.isPressButtonAtWorkEventName, Number(isMakePhotoAtWorkElement.checked)));
 }
 
 function sendLightEvent() {
     lightValueElement.innerText = lightElement.value;
     websock.send(getMessageToSend(eventNames.lightStatusEventName, lightElement.value));
+}
+
+function sendEventWorkingHours() {
+    const timeOnToSec = convertStringHorstToSeconds(lightOnAtElement.value);
+    const timeOffToSec = convertStringHorstToSeconds(lightOffAtElement.value);
+    setLightWorkingHoursFrom(timeOnToSec);
+    setLightWorkingHoursTo(timeOffToSec);
+    websock.send(getMessageToSend(eventNames.lightWorkingHoursFrom, timeOnToSec));
+    websock.send(getMessageToSend(eventNames.lightWorkingHoursTo, timeOffToSec));
+}
+
+function resetWorkingHors() {
+    lightOnAtElement.value = '00:00';
+    lightOffAtElement.value = '00:00';
+    sendEventWorkingHours();
 }
 
 function sendShutterEvent() {
@@ -194,6 +265,23 @@ function formatDate(d) {
         console.log(e);
         return 'error format';
     }
+}
+
+function convertStringHorstToSeconds(str) {
+    const strArr = str.split(':');
+    if (strArr[0] && strArr[1]) {
+        return Number(strArr[0]) * 60 * 60 + Number(strArr[1] * 60);
+    }
+}
+
+function convertSecondsToStringHorst(rawSec) {
+    const hours = Math.floor(rawSec / 60 / 60);
+    const hoursToSec = hours * 60 * 60;
+    const min = Math.floor((rawSec - hoursToSec)/60);
+    const minToSec = min * 60;
+    const sec = rawSec - hoursToSec - minToSec;
+    const stringHours = `${formatNumber(hours)}:${formatNumber(min)}:${formatNumber(sec)}`;
+    return stringHours;
 }
 
 function formatNumber(n) {

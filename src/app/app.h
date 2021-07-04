@@ -23,8 +23,12 @@ private:
     IntervalometerComponent *intervalometer;
     DatabaseService *database = DatabaseService::getInstance();
     unsigned long savedMillis = 0;
+    bool isOpenBoxAtWork;
+    bool isLightOnAtWork;
+    bool isMakePhotoAtWork;
     void startWork();
     void stopWork();
+    void stopWorkStage2();
 
 public:
     SocketService *socket;

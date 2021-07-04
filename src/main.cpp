@@ -7,12 +7,13 @@
 // 5. + connect and test button to make a photo
 // 11. + set brighness
 // 8. + smooth on/off light
-// 1. contorl work prosess:
+// 12. + ARDUINO POWER 12v !!!
+// 6. + light on at, light off at
+// 1. +++ contorl work prosess:
 //   - should box open?
 //   - should light on?
 //   - should press button?
-// 12. + ARDUINO POWER 12v !!!
-// 6. light on at, light off at
+// 11. wifi save to EEPROM
 // 9. connect photoresistor (test diff resisot to choose sensetivity), show current ligh status
 // 10. adjust light use photoresistor
 
@@ -75,7 +76,7 @@ void loop() {
     timeComponent->loop();
  
     intervalometer->loop(timeComponent->savedEpochTime);
-    light->loopIsTimeToOn(timeComponent->savedEpochTime);
+    light->loopIsTimeToOn(timeComponent->savedEpochTime, intervalometer->workStatus);
     light->loop();
     box->loop();
     shutter->loop();
